@@ -67,6 +67,7 @@ export const login = async (req, res) => {
 
   // Update the last login time
   user.last_active = new Date();
+  user.isOnline = true;
   await user.save({ validate: false });
 
   // Pass rememberMe flag to createSendToken function
@@ -187,7 +188,11 @@ export const getUserById = async (req, res) => {
   }
 };
 
-export const logout = (req, res) => {
+export const logout = async (req, res) => {
+  const user = await Users.findByPk(req.userId);
+  user.isOnline = false;
+  await user.save({ validate: false });
+
   res.cookie("refreshToken", "", {
     expires: new Date(0), // Hapus cookie segera dengan mengatur tanggal kedaluwarsa ke masa lalu
     httpOnly: true,

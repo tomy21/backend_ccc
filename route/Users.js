@@ -7,7 +7,7 @@ const router = express.Router();
 // Route HTTP untuk Gate
 router.post("/login", login);
 router.post("/register", register);
-router.post("/logout", logout);
+router.post("/logout", protectAuth, logout);
 router.get("/getUserById", protectAuth, getUserById);
 
 router.get("/protected", protectAuth, (req, res) => {

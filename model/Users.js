@@ -45,6 +45,9 @@ export const Users = dbOCC.define(
     is_active: {
       type: DataTypes.TEXT,
     },
+    isOnline: {
+      type: DataTypes.BOOLEAN,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
