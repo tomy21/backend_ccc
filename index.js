@@ -23,13 +23,13 @@ const httpServer = createServer(app);
 app.use(
   cors({
     credentials: true,
-    origin: ["*", "http://localhost:3000"],
+    origin: ["*", "http://localhost:3000", "https://dev-occ.skyparking.online"],
   })
 );
 
 const io = new Server(httpServer, {
   cors: {
-    origin: ["*", "http://localhost:3000"],
+    origin: ["*", "http://localhost:3000", "https://dev-occ.skyparking.online"],
     methods: ["GET", "POST", "PUT"],
     credentials: true,
   },
@@ -75,7 +75,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 3008;
+const PORT = 5001;
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
