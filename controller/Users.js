@@ -3,6 +3,7 @@ import { Users } from "../model/Users.js";
 import { Op } from "sequelize";
 import { v4 as uuidv4 } from "uuid";
 import nodemailer from "nodemailer";
+import { logUserActivity } from "../config/LogActivity.js";
 
 const signToken = (user, rememberMe) => {
   const expiresIn = rememberMe ? "30d" : "1d";
@@ -43,6 +44,7 @@ const createSendToken = (user, statusCode, res, rememberMe) => {
 
 export const login = async (req, res) => {
   const { identifier, password, rememberMe } = req.body;
+  const ip_address = req.ip;
 
   if (!identifier || !password) {
     return res.status(400).json({
@@ -70,12 +72,14 @@ export const login = async (req, res) => {
   user.isOnline = true;
   await user.save({ validate: false });
 
+  await logUserActivity(user.id, "User logged in", "LOGIN", ip_address);
   // Pass rememberMe flag to createSendToken function
   createSendToken(user, 200, res, rememberMe);
 };
 
 export const register = async (req, res) => {
   try {
+    const users = await Users.findByPk(req.userId);
     const { username, email, password, phone, idLokasi } = req.body;
 
     console.log(req.body);
@@ -87,7 +91,7 @@ export const register = async (req, res) => {
       id_lokasi: idLokasi,
       id_role: 1,
       is_active: "1",
-      createdBy: "admin",
+      createdBy: users.name,
     });
 
     //   await MemberUserRole.create({
@@ -121,6 +125,7 @@ export const register = async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     createSendToken(newUser, 201, res);
+    await logUserActivity(user.id, "User logged in", "LOGIN", ip_address);
   } catch (err) {
     res.status(400).json({
       status: "fail",

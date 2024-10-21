@@ -1,9 +1,9 @@
 import { DataTypes } from "sequelize";
-import dbOCC from "../config/dbConfig.js";
+import { dbOCC } from "../config/dbConfig.js";
 import { Gate } from "./Gate.js";
 
 export const IssuesModel = dbOCC.define(
-  "tbl_issues",
+  "OccIssue",
   {
     id: {
       type: DataTypes.BIGINT,
@@ -26,13 +26,9 @@ export const IssuesModel = dbOCC.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
-    id_gate: {
-      type: DataTypes.BIGINT,
+    gate: {
+      type: DataTypes.STRING,
       allowNull: false,
-      references: {
-        model: "tbl_gate",
-        key: "id",
-      },
     },
     action: {
       type: DataTypes.STRING(255),
@@ -51,6 +47,14 @@ export const IssuesModel = dbOCC.define(
       allowNull: false,
       defaultValue: "new",
     },
+    TrxNo: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    createdBy: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
@@ -67,6 +71,6 @@ export const IssuesModel = dbOCC.define(
   {
     timestamps: true,
     paranoid: true,
-    tableName: "tbl_issues",
+    tableName: "OccIssue",
   }
 );

@@ -1,9 +1,9 @@
 import { DataTypes } from "sequelize";
-import dbOCC from "../config/dbConfig.js";
+import { dbOCC } from "../config/dbConfig.js";
 import { LocationCCC } from "./Location.js";
 
 export const Gate = dbOCC.define(
-  "tbl_gate",
+  "OccGate",
   {
     id: {
       type: DataTypes.BIGINT,
@@ -35,18 +35,18 @@ export const Gate = dbOCC.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    created_at: {
+    createdAt: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: DataTypes.NOW,
     },
-    updated_at: {
+    updatedAt: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: DataTypes.NOW,
       onUpdate: DataTypes.NOW,
     },
-    deleted_at: {
+    deletedAt: {
       type: DataTypes.DATE,
       allowNull: true,
     },
@@ -54,7 +54,7 @@ export const Gate = dbOCC.define(
   {
     timestamps: false,
     paranoid: true, // Enable soft delete
-    tableName: "tbl_gate", // Nama tabel di database
+    tableName: "OccGate", // Nama tabel di database
   }
 );
 

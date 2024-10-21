@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
-import dbOCC from "../config/dbConfig.js";
+import { dbOCC } from "../config/dbConfig.js";
 
 export const Role = dbOCC.define(
-  "tbl_role",
+  "OccRole",
   {
     id: {
       type: DataTypes.BIGINT,

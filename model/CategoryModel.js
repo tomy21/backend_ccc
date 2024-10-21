@@ -1,9 +1,9 @@
 import { DataTypes } from "sequelize";
-import dbOCC from "../config/dbConfig.js";
-import { Object } from "./Object.js";
+import { dbOCC } from "../config/dbConfig.js";
+import { Description } from "./Description.js";
 
 export const CategoryModel = dbOCC.define(
-  "tbl_category",
+  "OccCategory",
   {
     id: {
       type: DataTypes.BIGINT,
@@ -14,6 +14,14 @@ export const CategoryModel = dbOCC.define(
     category: {
       type: DataTypes.STRING(255),
       allowNull: false,
+    },
+    createdBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    modifyBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -34,12 +42,12 @@ export const CategoryModel = dbOCC.define(
   {
     timestamps: false,
     paranoid: true, // Enable soft delete
-    tableName: "tbl_category", // Customize table name
+    tableName: "OccCategory", // Customize table name
   }
 );
 
 // Definisi relasi One-to-Many
-CategoryModel.hasMany(Object, {
+CategoryModel.hasMany(Description, {
   foreignKey: "id_category", // Foreign key di Object
-  as: "objects", // Alias untuk array Object di Category
+  as: "description", // Alias untuk array Object di Category
 });

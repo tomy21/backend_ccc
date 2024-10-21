@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import { Gate } from "../model/Gate.js";
 import { LocationCCC } from "../model/Location.js";
 import { notifyGateUpdate } from "../route/GateRoutes.js";
+import { OccIntercome } from "../model/OccIntercome.js";
 
 // Get All Gates
 export const getAllGates = async (req, res) => {
@@ -99,6 +100,35 @@ export const getGateById = async (req, res) => {
     });
     if (!gate) {
       return res.status(404).json({ message: "Gate not found" });
+    }
+
+    const locationName = gate.location?.Name;
+
+    const findIntercom = await OccIntercome.findOne({
+      where: {
+        GateName: gate.gate, // Ensure this is the correct field
+        Locations: locationName,
+      },
+    });
+    console.log(findIntercom);
+
+    if (!findIntercom) {
+      // If no intercom record is found, create a new one
+      await OccIntercome.create({
+        GateName: gate.gate, // Assuming `gate.gate` is correct
+        Locations: locationName,
+        Count: 1,
+      });
+    } else {
+      // If a matching entry exists, increment the count
+      await OccIntercome.update(
+        {
+          Count: findIntercom.Count + 1, // Access Count directly from findIntercom
+        },
+        {
+          where: { Id: findIntercom.Id }, // Update based on the correct record
+        }
+      );
     }
 
     req.io.emit("gateViewed", { event: "view", data: gate });

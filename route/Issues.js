@@ -6,10 +6,11 @@ import {
   updateIssue,
   deleteIssue,
 } from "../controller/Issues.js";
+import { protectAuth } from "../middleware/authMidOcc.js";
 
 const router = express.Router();
 
-router.post("/issues/create", createIssue); // Create Issue
+router.post("/issues/create", protectAuth, createIssue); // Create Issue
 router.get("/issues/getAll", getAllIssues); // Get All Issues
 router.get("/issues/getById/:id", getIssueById); // Get Issue by ID
 router.put("/issues/updated/:id", updateIssue); // Update Issue by ID

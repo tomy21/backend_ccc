@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
-import dbOCC from "../config/dbConfig.js";
+import { dbOCC } from "../config/dbConfig.js";
 
 export const LocationCCC = dbOCC.define(
-  "tbl_lokasi",
+  "OccRefLocation",
   {
     id: {
       type: DataTypes.BIGINT,
@@ -73,6 +73,6 @@ export const LocationCCC = dbOCC.define(
   {
     timestamps: false,
     paranoid: true, // Enable soft delete
-    tableName: "tbl_lokasi", // Customize table name
+    tableName: "OccRefLocation", // Customize table name
   }
 );

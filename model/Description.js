@@ -1,9 +1,8 @@
 import { DataTypes } from "sequelize";
-import dbOCC from "../config/dbConfig.js";
-import { CategoryModel } from "./CategoryModel.js";
+import { dbOCC } from "../config/dbConfig.js";
 
-export const Object = dbOCC.define(
-  "tbl_object",
+export const Description = dbOCC.define(
+  "OccDescription",
   {
     id: {
       type: DataTypes.BIGINT,
@@ -15,13 +14,21 @@ export const Object = dbOCC.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "tbl_category",
+        model: "OccCategory",
         key: "id",
       },
     },
     object: {
       type: DataTypes.STRING(255),
       allowNull: false,
+    },
+    createdBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    modifyBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -42,6 +49,6 @@ export const Object = dbOCC.define(
   {
     timestamps: false,
     paranoid: true, // Enable soft delete
-    tableName: "tbl_object", // Customize table name
+    tableName: "OccDescription", // Customize table name
   }
 );

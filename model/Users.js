@@ -1,11 +1,11 @@
 import { DataTypes } from "sequelize";
-import dbOCC from "../config/dbConfig.js";
+import { dbOCC } from "../config/dbConfig.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { Role } from "./Role.js";
 
 export const Users = dbOCC.define(
-  "tbl_users",
+  "OccUsers",
   {
     id: {
       type: DataTypes.BIGINT,
@@ -38,7 +38,7 @@ export const Users = dbOCC.define(
       type: DataTypes.BIGINT,
       allowNull: true,
       references: {
-        model: "tbl_role",
+        model: "OccRole",
         key: "id",
       },
     },

@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import dbOCC from "../config/dbConfig.js";
 
 export const MenuList = dbOCC.define(
-  "menu_list",
+  "OccMenu",
   {
     id: {
       type: DataTypes.BIGINT,

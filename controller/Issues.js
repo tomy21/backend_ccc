@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import { IssuesModel } from "../model/Issues.js";
 import { generateTicketNumber } from "./Generate.js"; // Helper untuk membuat tiket
 import { Gate } from "../model/Gate.js";
+import { Users } from "../model/Users.js";
 
 // CREATE Issue
 export const createIssue = async (req, res) => {
@@ -10,25 +11,27 @@ export const createIssue = async (req, res) => {
     category,
     lokasi,
     description,
-    id_gate,
+    gate,
     action,
     foto,
     number_plate,
+    TrxNo,
     status,
   } = req.body;
   try {
-    // Buat nomor tiket
     const ticket = await generateTicketNumber(idLocation);
-    console.log(ticket);
+    const users = await Users.findByPk(req.userId);
     const newIssue = await IssuesModel.create({
       ticket,
       category,
       lokasi,
       description,
-      id_gate,
+      gate,
       action,
       foto,
       number_plate,
+      TrxNo,
+      createdBy: users.name,
       status,
     });
     console.log(IssuesModel);
@@ -63,12 +66,6 @@ export const getAllIssues = async (req, res) => {
           [Op.like]: `%${search}%`,
         },
       },
-      include: [
-        {
-          model: Gate,
-          attributes: ["gate"],
-        },
-      ],
       limit: parseInt(limit, 10),
       offset: offset,
     });

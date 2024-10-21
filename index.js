@@ -10,7 +10,8 @@ import HikvisionIntegration from "./route/HikvisionRoutes.js";
 import userOcc from "./route/Users.js";
 import issuesOcc from "./route/Issues.js";
 import category from "./route/Category.js";
-import objectRoute from "./route/Object.js";
+import descriptionRoute from "./route/Description.js";
+import transactionParking from "./route/TransactionParkingIntegration.js";
 import { initRelations } from "./model/Relation.js";
 
 import { createServer } from "http";
@@ -53,7 +54,8 @@ app.use("/v01/occ/api", GateRoutes);
 app.use("/v01/occ/api", userOcc);
 app.use("/v01/occ/api", issuesOcc);
 app.use("/v01/occ/api", category);
-app.use("/v01/occ/api", objectRoute);
+app.use("/v01/occ/api", descriptionRoute);
+app.use("/v01/occ/api", transactionParking);
 
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
