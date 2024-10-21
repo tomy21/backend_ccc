@@ -7,6 +7,7 @@ import {
   deleteGate,
   getArduinoById,
 } from "../controller/GateController.js";
+import { protectAuth } from "../middleware/authMidOcc.js";
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.post("/gates", (req, res) => {
   createGate(req, res);
   notifyGateUpdate(req.io, { event: "create", data: req.body });
 });
-router.put("/gates/:id", updateGate);
+router.put("/gates/:id", protectAuth, updateGate);
 router.delete("/gates/:id", (req, res) => {
   deleteGate(req, res);
   notifyGateUpdate(req.io, { event: "delete", data: req.params.id });

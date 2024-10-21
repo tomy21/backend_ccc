@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { dbOCC } from "../config/dbConfig.js";
+import { Users } from "./Users.js";
 
 export const OccLogActivity = dbOCC.define(
   "LogOccActivity",
@@ -7,6 +8,10 @@ export const OccLogActivity = dbOCC.define(
     id_users: {
       type: DataTypes.BIGINT,
       allowNull: false,
+      references: {
+        model: "OccUsers",
+        key: "id",
+      },
     },
     activity: {
       type: DataTypes.TEXT,
@@ -39,3 +44,8 @@ export const OccLogActivity = dbOCC.define(
     paranoid: true, // Untuk soft delete
   }
 );
+
+OccLogActivity.belongsTo(Users, {
+  foreignKey: "id_users",
+  targetKey: "id",
+});

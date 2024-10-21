@@ -3,6 +3,8 @@ import { Gate } from "../model/Gate.js";
 import { LocationCCC } from "../model/Location.js";
 import { notifyGateUpdate } from "../route/GateRoutes.js";
 import { OccIntercome } from "../model/OccIntercome.js";
+import { logUserActivity } from "../config/LogActivity.js";
+import { Users } from "../model/Users.js";
 
 // Get All Gates
 export const getAllGates = async (req, res) => {
@@ -110,7 +112,7 @@ export const getGateById = async (req, res) => {
         Locations: locationName,
       },
     });
-    console.log(findIntercom);
+    // console.log(findIntercom);
 
     if (!findIntercom) {
       // If no intercom record is found, create a new one
@@ -186,6 +188,8 @@ export const createGate = async (req, res) => {
 export const updateGate = async (req, res) => {
   const { id_location, gate, channel_cctv, arduino, id_tele, statusGate } =
     req.body;
+  const users = await Users.findByPk(req.userId);
+  const ip_address = req.ip;
 
   try {
     const existingGate = await Gate.findByPk(req.params.id);
@@ -206,6 +210,15 @@ export const updateGate = async (req, res) => {
     // // Kirim ke semua WebSocket client setelah update
     // notifyGateUpdate(req.io, { event: "update", data: existingGate });
     // req.io.emit("gateViewed", { event: "view", data: "gate_Open" });
+
+    if (arduino === "1") {
+      await logUserActivity(
+        users.id,
+        JSON.stringify(existingGate),
+        "OPEN_GATE",
+        ip_address
+      );
+    }
 
     res.status(200).json(existingGate);
   } catch (error) {
