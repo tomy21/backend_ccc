@@ -3,6 +3,7 @@ import { IssuesModel } from "../model/Issues.js";
 import { generateTicketNumber } from "./Generate.js"; // Helper untuk membuat tiket
 import { Gate } from "../model/Gate.js";
 import { Users } from "../model/Users.js";
+import { logUserActivity } from "../config/LogActivity.js";
 
 // CREATE Issue
 export const createIssue = async (req, res) => {
@@ -34,7 +35,7 @@ export const createIssue = async (req, res) => {
       createdBy: users.name,
       status,
     });
-    console.log(IssuesModel);
+    // console.log(IssuesModel);
 
     res.status(201).json({
       status: "success",
@@ -45,6 +46,31 @@ export const createIssue = async (req, res) => {
       status: "error",
       message: error.message,
     });
+  }
+};
+
+export const createIssueByArduino = async (req) => {
+  // Hapus res dari parameter
+  const { lokasi, gate, foto, number_plate, TrxNo, status } = req.body;
+
+  try {
+    const ticket = await generateTicketNumber(lokasi);
+    const newIssue = await IssuesModel.create({
+      ticket,
+      lokasi,
+      gate,
+      foto,
+      number_plate,
+      TrxNo,
+      status,
+    });
+
+    return {
+      status: "success",
+      data: newIssue,
+    };
+  } catch (error) {
+    throw new Error(error.message); // Buang error ke caller
   }
 };
 
@@ -68,6 +94,7 @@ export const getAllIssues = async (req, res) => {
       },
       limit: parseInt(limit, 10),
       offset: offset,
+      order: [["updatedAt", "DESC"]],
     });
 
     res.status(200).json({
@@ -109,6 +136,8 @@ export const getIssueById = async (req, res) => {
 // UPDATE Issue
 export const updateIssue = async (req, res) => {
   const { id } = req.params;
+  const users = await Users.findByPk(req.userId);
+  const ip_address = req.ip;
   const {
     category,
     lokasi,
@@ -138,8 +167,16 @@ export const updateIssue = async (req, res) => {
     issue.foto = foto || issue.foto;
     issue.number_plate = number_plate || issue.number_plate;
     issue.status = status || issue.status;
+    issue.modifiedBy = users.name;
 
     await issue.save();
+
+    await logUserActivity(
+      req.userId,
+      JSON.stringify(issue),
+      "UPDATE_ISSUES",
+      ip_address
+    );
 
     res.status(200).json({
       status: "success",

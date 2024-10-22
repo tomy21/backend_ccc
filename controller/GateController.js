@@ -5,6 +5,7 @@ import { notifyGateUpdate } from "../route/GateRoutes.js";
 import { OccIntercome } from "../model/OccIntercome.js";
 import { logUserActivity } from "../config/LogActivity.js";
 import { Users } from "../model/Users.js";
+import { createIssueByArduino } from "./Issues.js";
 
 // Get All Gates
 export const getAllGates = async (req, res) => {
@@ -100,42 +101,60 @@ export const getGateById = async (req, res) => {
         },
       ],
     });
+
     if (!gate) {
-      return res.status(404).json({ message: "Gate not found" });
+      return res.status(404).json({ message: "Gate tidak ditemukan" });
     }
+
+    const newReq = {
+      body: {
+        lokasi: gate.location?.Name,
+        gate: gate.gate,
+        foto: "-",
+        number_plate: "-",
+        TrxNo: "-",
+        status: "new",
+        createdBy: "Customer",
+      },
+    };
+
+    const issueResponse = await createIssueByArduino(newReq);
 
     const locationName = gate.location?.Name;
 
     const findIntercom = await OccIntercome.findOne({
       where: {
-        GateName: gate.gate, // Ensure this is the correct field
+        GateName: gate.gate,
         Locations: locationName,
       },
     });
-    // console.log(findIntercom);
 
     if (!findIntercom) {
-      // If no intercom record is found, create a new one
       await OccIntercome.create({
-        GateName: gate.gate, // Assuming `gate.gate` is correct
+        GateName: gate.gate,
         Locations: locationName,
         Count: 1,
       });
     } else {
-      // If a matching entry exists, increment the count
       await OccIntercome.update(
         {
-          Count: findIntercom.Count + 1, // Access Count directly from findIntercom
+          Count: findIntercom.Count + 1,
         },
         {
-          where: { Id: findIntercom.Id }, // Update based on the correct record
+          where: { Id: findIntercom.Id },
         }
       );
     }
 
-    req.io.emit("gateViewed", { event: "view", data: gate });
+    req.io.emit("gateViewed", {
+      event: "view",
+      data: { dataGate: gate, dataIssues: issueResponse },
+    });
 
-    res.status(200).json(gate);
+    res.status(200).json({
+      success: true,
+      dataIssues: { dataGate: gate, dataIssues: issueResponse },
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -186,8 +205,7 @@ export const createGate = async (req, res) => {
 
 // Update Gate By ID
 export const updateGate = async (req, res) => {
-  const { id_location, gate, channel_cctv, arduino, id_tele, statusGate } =
-    req.body;
+  const { gate, channel_cctv, arduino, id_tele, statusGate } = req.body;
   const users = await Users.findByPk(req.userId);
   const ip_address = req.ip;
 
@@ -197,8 +215,6 @@ export const updateGate = async (req, res) => {
       return res.status(404).json({ message: "Gate not found" });
     }
 
-    // Update only the fields that are provided, keep others as they are
-    existingGate.id_location = id_location || existingGate.id_location;
     existingGate.gate = gate || existingGate.gate;
     existingGate.channel_cctv = channel_cctv || existingGate.channel_cctv;
     existingGate.statusGate = statusGate || existingGate.statusGate;

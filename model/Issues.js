@@ -16,7 +16,7 @@ export const IssuesModel = dbOCC.define(
     },
     category: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     lokasi: {
       type: DataTypes.STRING(255),
@@ -24,7 +24,7 @@ export const IssuesModel = dbOCC.define(
     },
     description: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     gate: {
       type: DataTypes.STRING,
@@ -32,7 +32,7 @@ export const IssuesModel = dbOCC.define(
     },
     action: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     foto: {
       type: DataTypes.STRING(255),
@@ -52,6 +52,11 @@ export const IssuesModel = dbOCC.define(
       allowNull: true,
     },
     createdBy: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      defaultValue: "Customer",
+    },
+    modifiedBy: {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
