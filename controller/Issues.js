@@ -239,6 +239,7 @@ export const summaryByCategory = async (req, res) => {
     });
   }
 };
+
 export const summaryByMonth = async (req, res) => {
   try {
     // Mengambil ringkasan jumlah issue berdasarkan bulan

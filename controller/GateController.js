@@ -157,13 +157,13 @@ const processQueue = async () => {
     }
 
     // Emit hanya jika belum pernah mengirim emit
-    if (!isEmitting) {
-      isEmitting = true; // Tandai bahwa emit sudah dilakukan
-      req.io.emit("gateViewed", {
-        event: "view",
-        data: { dataGate: gate, dataIssues: issueResponse },
-      });
-    }
+    // if (!isEmitting) {
+    //   isEmitting = true; // Tandai bahwa emit sudah dilakukan
+    req.io.emit("gateViewed", {
+      event: "view",
+      data: { dataGate: gate, dataIssues: issueResponse },
+    });
+    // }
 
     res.status(200).json({
       success: true,
