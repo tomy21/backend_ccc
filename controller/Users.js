@@ -199,7 +199,7 @@ export const logout = async (req, res) => {
   await user.save({ validate: false });
 
   res.cookie("refreshToken", "", {
-    expires: new Date(0), // Hapus cookie segera dengan mengatur tanggal kedaluwarsa ke masa lalu
+    expires: new Date(0),
     httpOnly: true,
     // secure: process.env.NODE_ENV === "production",  // Hanya secure di production (HTTPS)
     // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",  // SameSite none untuk secure

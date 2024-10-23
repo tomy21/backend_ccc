@@ -90,8 +90,19 @@ export const getGateByIdArduino = async (req, res) => {
   }
 };
 
-export const getGateById = async (req, res) => {
+const requestQueue = []; // Struktur antrean
+let isEmitting = false;
+
+const processQueue = async () => {
+  if (requestQueue.length === 0) {
+    return;
+  }
+
+  const currentRequest = requestQueue.shift(); // Ambil permintaan pertama dalam antrean
+
   try {
+    const { req, res } = currentRequest;
+
     const gate = await Gate.findByPk(req.params.id, {
       include: [
         {
@@ -119,7 +130,6 @@ export const getGateById = async (req, res) => {
     };
 
     const issueResponse = await createIssueByArduino(newReq);
-
     const locationName = gate.location?.Name;
 
     const findIntercom = await OccIntercome.findOne({
@@ -146,10 +156,14 @@ export const getGateById = async (req, res) => {
       );
     }
 
-    req.io.emit("gateViewed", {
-      event: "view",
-      data: { dataGate: gate, dataIssues: issueResponse },
-    });
+    // Emit hanya jika belum pernah mengirim emit
+    if (!isEmitting) {
+      isEmitting = true; // Tandai bahwa emit sudah dilakukan
+      req.io.emit("gateViewed", {
+        event: "view",
+        data: { dataGate: gate, dataIssues: issueResponse },
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -157,6 +171,16 @@ export const getGateById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  } finally {
+    processQueue(); // Proses permintaan berikutnya dalam antrean
+  }
+};
+
+export const getGateById = async (req, res) => {
+  requestQueue.push({ req, res }); // Tambahkan permintaan ke antrean
+  if (requestQueue.length === 1) {
+    // Jika ini adalah permintaan pertama, mulai proses
+    processQueue();
   }
 };
 

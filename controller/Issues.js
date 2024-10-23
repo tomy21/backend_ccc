@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { IssuesModel } from "../model/Issues.js";
 import { generateTicketNumber } from "./Generate.js"; // Helper untuk membuat tiket
 import { Gate } from "../model/Gate.js";
@@ -207,6 +207,57 @@ export const deleteIssue = async (req, res) => {
     res.status(204).json({
       status: "success",
       message: "Issue deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
+export const summaryByCategory = async (req, res) => {
+  try {
+    // Mengambil ringkasan berdasarkan kategori
+    const summary = await IssuesModel.findAll({
+      attributes: [
+        "category",
+        [Sequelize.fn("COUNT", Sequelize.col("id")), "issueCount"], // Menghitung jumlah isu
+      ],
+      group: "category", // Mengelompokkan berdasarkan kategori
+      raw: true, // Menghasilkan hasil sebagai objek biasa
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: summary,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+export const summaryByMonth = async (req, res) => {
+  try {
+    // Mengambil ringkasan jumlah issue berdasarkan bulan
+    const summary = await IssuesModel.findAll({
+      attributes: [
+        [
+          Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), "%Y-%m"),
+          "month",
+        ], // Mengelompokkan berdasarkan bulan (format: YYYY-MM)
+        [Sequelize.fn("COUNT", Sequelize.col("id")), "issueCount"], // Menghitung jumlah issue di setiap bulan
+      ],
+      group: ["month"], // Mengelompokkan berdasarkan bulan
+      order: [["month", "ASC"]], // Mengurutkan berdasarkan bulan (dari Januari ke bulan-bulan selanjutnya)
+      raw: true,
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: summary,
     });
   } catch (error) {
     res.status(500).json({
