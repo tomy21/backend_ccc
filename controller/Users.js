@@ -94,10 +94,10 @@ export const register = async (req, res) => {
       createdBy: users.name,
     });
 
-    //   await MemberUserRole.create({
-    //     UserId: newUser.id,
-    //     RoleId: roleId || 4,
-    //   });
+    await MemberUserRole.create({
+      UserId: newUser.id,
+      RoleId: roleId || 4,
+    });
     const activationToken = newUser.createActivationToken();
     await newUser.save({ validate: false });
 
@@ -125,7 +125,7 @@ export const register = async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     createSendToken(newUser, 201, res);
-    await logUserActivity(user.id, "User logged in", "LOGIN", ip_address);
+    await logUserActivity(users.id, "User logged in", "LOGIN", ip_address);
   } catch (err) {
     res.status(400).json({
       status: "fail",
