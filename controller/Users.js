@@ -96,7 +96,7 @@ export const register = async (req, res) => {
 
     await MemberUserRole.create({
       UserId: newUser.id,
-      RoleId: roleId || 4,
+      RoleId: roleId || 1,
     });
     const activationToken = newUser.createActivationToken();
     await newUser.save({ validate: false });
