@@ -31,13 +31,13 @@ app.use(
 );
 app.options("*", cors());
 
-// const io = new Server(httpServer, {
-//   cors: {
-//     origin: ["http://localhost:3000", "https://dev-occ.skyparking.online"],
-//     methods: ["GET", "POST", "PUT"],
-//     credentials: true,
-//   },
-// });
+const io = new Server(httpServer, {
+  cors: {
+    origin: ["http://localhost:3000", "https://dev-occ.skyparking.online"],
+    methods: ["GET", "POST", "PUT"],
+    credentials: true,
+  },
+});
 
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -62,25 +62,25 @@ app.use("/v01/occ/api", transactionParking);
 app.use("/v01/occ/api", logActivity);
 app.use("/v01/occ/api", StreamingCCTV);
 
-// io.on("connection", (socket) => {
-//   console.log(`User connected: ${socket.id}`);
+io.on("connection", (socket) => {
+  console.log(`User connected: ${socket.id}`);
 
-//   // Mengirim pesan ke client setelah terhubung
-//   socket.emit("welcome", { message: "Welcome to Socket.IO server" });
+  // Mengirim pesan ke client setelah terhubung
+  socket.emit("welcome", { message: "Welcome to Socket.IO server" });
 
-//   // Menerima pesan dari client
-//   socket.on("message", (msg) => {
-//     console.log(`Message from client: ${msg}`);
+  // Menerima pesan dari client
+  socket.on("message", (msg) => {
+    console.log(`Message from client: ${msg}`);
 
-//     // Kirim balasan ke client yang sama
-//     socket.emit("response", { message: "Message received" });
-//   });
+    // Kirim balasan ke client yang sama
+    socket.emit("response", { message: "Message received" });
+  });
 
-//   // Event untuk menangani disconnect
-//   socket.on("disconnect", () => {
-//     console.log(`User disconnected: ${socket.id}`);
-//   });
-// });
+  // Event untuk menangani disconnect
+  socket.on("disconnect", () => {
+    console.log(`User disconnected: ${socket.id}`);
+  });
+});
 
 const PORT = 7001;
 httpServer.listen(PORT, () => {
