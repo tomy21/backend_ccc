@@ -82,7 +82,7 @@ app.use("/v01/occ/api", StreamingCCTV);
 //   });
 // });
 
-const PORT = 5001;
+const PORT = 7001;
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
