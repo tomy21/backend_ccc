@@ -29,6 +29,7 @@ app.use(
     credentials: true,
   })
 );
+app.options("*", cors());
 
 // const io = new Server(httpServer, {
 //   cors: {

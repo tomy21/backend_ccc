@@ -35,6 +35,7 @@ const createSendToken = (user, statusCode, res, rememberMe) => {
     httpOnly: true,
     secure: true,
     expires: new Date(Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000),
+    sameSite: "None",
   });
 
   res.status(statusCode).json({
