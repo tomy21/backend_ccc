@@ -3,6 +3,7 @@ import { dbOCC } from "../config/dbConfig.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { Role } from "./Role.js";
+import { LocationCCC } from "./Location.js";
 
 export const Users = dbOCC.define(
   "OccUsers",
@@ -30,6 +31,11 @@ export const Users = dbOCC.define(
     },
     id_lokasi: {
       type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: "OccRefLocation",
+        key: "id",
+      },
     },
     foto: {
       type: DataTypes.STRING(20),
@@ -106,5 +112,10 @@ Users.prototype.correctPassword = async function (
 
 Users.belongsTo(Role, {
   foreignKey: "id_role",
+  targetKey: "id",
+});
+
+Users.belongsTo(LocationCCC, {
+  foreignKey: "id_lokasi",
   targetKey: "id",
 });

@@ -1,5 +1,11 @@
 import express from "express";
-import { login, register, getUserById, logout } from "../controller/Users.js";
+import {
+  login,
+  register,
+  getUserById,
+  logout,
+  getAllUsers,
+} from "../controller/Users.js";
 import { protectAuth } from "../middleware/authMidOcc.js";
 
 const router = express.Router();
@@ -9,6 +15,7 @@ router.post("/login", login);
 router.post("/register", protectAuth, register);
 router.post("/logout", protectAuth, logout);
 router.get("/getUserById", protectAuth, getUserById);
+router.get("/getAllUsers", getAllUsers);
 
 router.get("/protected", protectAuth, (req, res) => {
   const token = req.cookies.refreshToken;

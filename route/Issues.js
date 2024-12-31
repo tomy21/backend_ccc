@@ -8,6 +8,7 @@ import {
   createIssueByArduino,
   summaryByCategory,
   summaryByMonth,
+  summaryIssues,
 } from "../controller/Issues.js";
 import { protectAuth } from "../middleware/authMidOcc.js";
 
@@ -21,5 +22,6 @@ router.put("/issues/updated/:id", protectAuth, updateIssue);
 router.delete("/issues/deleted:id", deleteIssue);
 router.get("/issues/getSummaryCategory", summaryByCategory);
 router.get("/issues/getSummaryMonth", summaryByMonth);
+router.get("/issues/getSummary", summaryIssues);
 
 export default router;

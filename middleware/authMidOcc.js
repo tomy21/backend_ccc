@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { Users } from "../model/Users.js";
+import { Users } from "../../../Command-Center/backend-ccc/model/Users.js";
 
 export const protectAuth = async (req, res, next) => {
   let token;

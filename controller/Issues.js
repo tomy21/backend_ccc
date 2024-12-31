@@ -218,19 +218,42 @@ export const deleteIssue = async (req, res) => {
 
 export const summaryByCategory = async (req, res) => {
   try {
-    // Mengambil ringkasan berdasarkan kategori
     const summary = await IssuesModel.findAll({
       attributes: [
         "category",
-        [Sequelize.fn("COUNT", Sequelize.col("id")), "issueCount"], // Menghitung jumlah isu
+        [Sequelize.fn("COUNT", Sequelize.col("id")), "issueCount"],
       ],
-      group: "category", // Mengelompokkan berdasarkan kategori
-      raw: true, // Menghasilkan hasil sebagai objek biasa
+      group: "category",
+      raw: true,
     });
 
     res.status(200).json({
       status: "success",
       data: summary,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
+export const summaryIssues = async (req, res) => {
+  try {
+    const statusSummary = await IssuesModel.findAndCountAll({
+      attributes: ["status"],
+      group: ["status"],
+      rows: false,
+    });
+    const statusSummaryAll = await IssuesModel.findAndCountAll({
+      rows: false,
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: statusSummary,
+      countAll: statusSummaryAll,
     });
   } catch (error) {
     res.status(500).json({

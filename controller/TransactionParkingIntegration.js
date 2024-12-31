@@ -29,10 +29,10 @@ export const getAllTransactions = async (req, res) => {
   let limit = parseInt(req.query.limit) || 5; // Default limit is 5
   let offset = parseInt(req.query.offset) || 0;
 
-  console.log(`Limit: ${limit}, Offset: ${offset}`); // Tambahkan log untuk debug
+  console.log(`Limit: ${limit}, Offset: ${offset}`);
 
   try {
-    const transactions = await TransactionParkingIntegration.findAndCountAll({
+    const transactions = await TransactionParkingIntegration.findAll({
       limit: limit,
       offset: offset,
     });

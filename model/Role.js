@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import { dbOCC } from "../config/dbConfig.js";
 
 export const Role = dbOCC.define(
-  "OccRole",
+  "OccRoles",
   {
     id: {
       type: DataTypes.BIGINT,

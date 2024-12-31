@@ -4,6 +4,8 @@ import { Op } from "sequelize";
 import { v4 as uuidv4 } from "uuid";
 import nodemailer from "nodemailer";
 import { logUserActivity } from "../config/LogActivity.js";
+import { Role } from "../model/Role.js";
+import { LocationCCC } from "../model/Location.js";
 
 const signToken = (user, rememberMe) => {
   const expiresIn = rememberMe ? "30d" : "1d";
@@ -172,7 +174,14 @@ export const activateAccount = async (req, res) => {
 
 export const getUserById = async (req, res) => {
   try {
-    const userById = await Users.findByPk(req.userId);
+    const userById = await Users.findByPk(req.userId, {
+      include: [
+        {
+          model: LocationCCC,
+          attributes: ["id", "name"],
+        },
+      ],
+    });
 
     if (!userById) {
       return res.status(404).json({
@@ -184,6 +193,31 @@ export const getUserById = async (req, res) => {
       statusCode: 200,
       message: "Users retrieved successfully",
       data: userById,
+    });
+  } catch (err) {
+    res.status(400).json({
+      statusCode: 400,
+      message: err.message,
+    });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await Users.findAll({
+      include: [
+        {
+          model: LocationCCC,
+          attributes: ["id", "name"],
+        },
+      ],
+      attributes: ["id", "name", "isOnline", "last_active"],
+    });
+
+    res.status(200).json({
+      statusCode: 200,
+      message: "Users retrieved successfully",
+      data: users,
     });
   } catch (err) {
     res.status(400).json({

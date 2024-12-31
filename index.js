@@ -13,6 +13,7 @@ import category from "./route/Category.js";
 import descriptionRoute from "./route/Description.js";
 import transactionParking from "./route/TransactionParkingIntegration.js";
 import logActivity from "./route/LogActivity.js";
+import StreamingCCTV from "./route/Streaming.js";
 import { initRelations } from "./model/Relation.js";
 
 import { createServer } from "http";
@@ -58,6 +59,7 @@ app.use("/v01/occ/api", category);
 app.use("/v01/occ/api", descriptionRoute);
 app.use("/v01/occ/api", transactionParking);
 app.use("/v01/occ/api", logActivity);
+app.use("/v01/occ/api", StreamingCCTV);
 
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);

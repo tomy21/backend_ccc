@@ -9,7 +9,7 @@ services:
     volumes:
       - .:/app
       - node_modules:/app/node_modules
-      - /shared/upload_ccc/uploads:/app/uploads
+      # - /shared/upload_ccc/uploads:/app/uploads
     environment:
       - PORT=5001
     ports:
