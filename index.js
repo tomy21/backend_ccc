@@ -25,24 +25,14 @@ const httpServer = createServer(app);
 
 app.use(
   cors({
+    origin: ["http://localhost:3000", "https://dev-occ.skyparking.online"],
     credentials: true,
-    origin: [
-      "*",
-      "http://localhost:3000",
-      "https://dev-occ.skyparking.online",
-      "https://ws-occ.skyparking.online",
-    ],
   })
 );
 
 const io = new Server(httpServer, {
   cors: {
-    origin: [
-      "*",
-      "http://localhost:3000",
-      "https://dev-occ.skyparking.online",
-      "https://ws-occ.skyparking.online",
-    ],
+    origin: ["http://localhost:3000", "https://dev-occ.skyparking.online"],
     methods: ["GET", "POST", "PUT"],
     credentials: true,
   },
