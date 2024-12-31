@@ -16,7 +16,7 @@ RUN npm install -g pm2
 COPY . .
 
 # Expose the application port
-EXPOSE 5001
+EXPOSE 5003
 
 # Start the application using PM2
 CMD ["pm2-runtime", "start", "npm", "--", "start"]
