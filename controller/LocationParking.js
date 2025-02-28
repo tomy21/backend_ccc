@@ -16,7 +16,11 @@ export const getAllParkingLocations = async (req, res) => {
 // Get Location by ID
 export const getParkingLocationById = async (req, res) => {
   try {
-    const location = await ParkingLocation.findByPk(req.params.id);
+    const location = await ParkingLocation.findOne({
+      where: {
+        LocationCode: req.params.code,
+      },
+    });
     if (!location)
       return res.status(404).json({ message: "Location not found" });
     res.json({

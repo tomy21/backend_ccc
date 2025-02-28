@@ -34,9 +34,9 @@ const createSendToken = (user, statusCode, res, rememberMe) => {
 
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    secure: false,
+    secure: true,
     expires: new Date(Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000),
-    sameSite: "None",
+    // sameSite: "None",
   });
 
   res.status(statusCode).json({
