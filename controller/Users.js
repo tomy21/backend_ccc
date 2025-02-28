@@ -6,6 +6,7 @@ import nodemailer from "nodemailer";
 import { logUserActivity } from "../config/LogActivity.js";
 import { Role } from "../model/Role.js";
 import { LocationCCC } from "../model/Location.js";
+import ParkingLocation from "../model/LocationParking.js";
 
 const signToken = (user, rememberMe) => {
   const expiresIn = rememberMe ? "30d" : "1d";
@@ -33,7 +34,7 @@ const createSendToken = (user, statusCode, res, rememberMe) => {
 
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    secure: true,
+    secure: false,
     expires: new Date(Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000),
     sameSite: "None",
   });
@@ -46,27 +47,28 @@ const createSendToken = (user, statusCode, res, rememberMe) => {
 };
 
 export const login = async (req, res) => {
-  const { identifier, password, rememberMe } = req.body;
+  const { identidfier, password, rememberMe } = req.body;
   const ip_address = req.ip;
-
-  if (!identifier || !password) {
+  console.log(req.body);
+  if (!identidfier || !password) {
     return res.status(400).json({
       status: "fail",
-      message: "Please provide an identifier (username or email) and password!",
+      message:
+        "Please provide an identidfier (username or email) and password!",
     });
   }
 
   // Find user by username, email, or phone number
   const user = await Users.findOne({
     where: {
-      [Op.or]: [{ name: identifier }, { email: identifier }],
+      [Op.or]: [{ name: identidfier }, { email: identidfier }],
     },
   });
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return res.status(401).json({
       status: "fail",
-      message: "Incorrect identifier or password",
+      message: "Incorrect identidfier or password",
     });
   }
 
@@ -80,59 +82,104 @@ export const login = async (req, res) => {
   createSendToken(user, 200, res, rememberMe);
 };
 
+// export const register = async (req, res) => {
+//   try {
+//     const users = await Users.findByPk(req.userId);
+//     // const roleId = req.roleId;
+//     console.log(users.name);
+//     const { username, email, password, phone, idLokasi, idRole } = req.body;
+
+//     const newUser = await Users.create({
+//       name: username,
+//       email: email,
+//       password: password,
+//       no_tlp: phone,
+//       id_lokasi: idLokasi,
+//       id_role: idRole,
+//       is_active: "1",
+//       createdBy: users.name,
+//     });
+//     console.log(newUser);
+
+//     // await MemberUserRole.create({
+//     //   UserId: newUser.id,
+//     //   RoleId: roleId || 1,
+//     // });
+//     const activationToken = newUser.createActivationToken();
+//     await newUser.save({ validate: false });
+
+//     const activationURL = `${req.protocol}://${req.get(
+//       "host"
+//     )}/v01/member/api/auth/activate/${activationToken}`;
+
+//     const transporter = nodemailer.createTransport({
+//       host: "smtp.office365.com", // Server SMTP Outlook
+//       port: 587, // Port SMTP
+//       secure: false,
+//       auth: {
+//         user: process.env.EMAIL_USER,
+//         pass: process.env.EMAIL_PASS,
+//       },
+//     });
+
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: newUser.email,
+//       subject: "Account Activation",
+//       text: `Please activate your account by clicking on the link: ${activationURL}`,
+//     };
+
+//     await transporter.sendMail(mailOptions);
+
+//     createSendToken(newUser, 201, res);
+//     await logUserActivity(users.id, "User logged in", "LOGIN", ip_address);
+//   } catch (err) {
+//     res.status(400).json({
+//       status: "fail",
+//       message: err.message,
+//       errors: err.errors,
+//     });
+//   }
+// };
+
 export const register = async (req, res) => {
   try {
-    const users = await Users.findByPk(req.userId);
-    const { username, email, password, phone, idLokasi } = req.body;
+    // const users = await Users.findByPk(req.userId);
+    // if (!users) {
+    //   return res.status(404).json({ message: "User not found" });
+    // }
 
-    console.log(req.body);
+    const { username, email, password, phone, idLokasi, idRole } = req.body;
+
+    // Buat user baru langsung aktif
     const newUser = await Users.create({
       name: username,
       email: email,
-      password: password,
+      password: password, // **Pastikan password di-hash!**
       no_tlp: phone,
       id_lokasi: idLokasi,
-      id_role: 1,
-      is_active: "1",
-      createdBy: users.name,
+      id_role: idRole,
+      is_active: "1", // User langsung aktif tanpa aktivasi email
+      createdBy: "admin",
     });
 
-    await MemberUserRole.create({
-      UserId: newUser.id,
-      RoleId: roleId || 1,
-    });
-    const activationToken = newUser.createActivationToken();
-    await newUser.save({ validate: false });
+    console.log("✅ User registered:", newUser);
 
-    const activationURL = `${req.protocol}://${req.get(
-      "host"
-    )}/v01/member/api/auth/activate/${activationToken}`;
-
-    const transporter = nodemailer.createTransport({
-      host: "smtp.office365.com", // Server SMTP Outlook
-      port: 587, // Port SMTP
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
+    // Kirim token login langsung (jika ingin auto-login setelah register)
+    // createSendToken(newUser, 201, res);
+    res.status(201).json({
+      status: "success",
+      message: "User registered successfully",
+      newUser,
     });
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: newUser.email,
-      subject: "Account Activation",
-      text: `Please activate your account by clicking on the link: ${activationURL}`,
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    createSendToken(newUser, 201, res);
-    await logUserActivity(users.id, "User logged in", "LOGIN", ip_address);
+    // Log aktivitas user
+    await logUserActivity("users.id", "User registered", "REGISTER");
   } catch (err) {
     res.status(400).json({
       status: "fail",
       message: err.message,
+      errors: err.errors,
     });
   }
 };
@@ -180,6 +227,10 @@ export const getUserById = async (req, res) => {
         {
           model: LocationCCC,
           attributes: ["id", "name"],
+        },
+        {
+          model: ParkingLocation,
+          attributes: ["id", "LocationCode", "LocationName"],
         },
       ],
     });

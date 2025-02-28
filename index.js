@@ -14,6 +14,8 @@ import descriptionRoute from "./route/Description.js";
 import transactionParking from "./route/TransactionParkingIntegration.js";
 import logActivity from "./route/LogActivity.js";
 import StreamingCCTV from "./route/Streaming.js";
+import LocationParkingRoute from "./route/LocationParking.js";
+import TransactionParkingRoute from "./route/TransactionParking.js";
 import { initRelations } from "./model/Relation.js";
 
 import { createServer } from "http";
@@ -61,6 +63,9 @@ app.use("/v01/occ/api", descriptionRoute);
 app.use("/v01/occ/api", transactionParking);
 app.use("/v01/occ/api", logActivity);
 app.use("/v01/occ/api", StreamingCCTV);
+
+app.use("/v01/parking/api", LocationParkingRoute);
+app.use("/v01/parking/api", TransactionParkingRoute);
 
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);

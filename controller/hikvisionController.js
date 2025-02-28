@@ -1,5 +1,6 @@
 import { makeHikvisionRequest } from "../config/HikvisioConfig.js";
 import { spawn } from "child_process";
+import ffmpeg from "fluent-ffmpeg";
 
 // Controller untuk menangkap gambar (capture)
 export const captureImage = async (req, res) => {
@@ -24,45 +25,44 @@ export const captureImage = async (req, res) => {
 
 // Controller untuk memulai streaming video
 export const streamVideo = async (req, res) => {
+  let ffmpegProcess = null;
   const rtspUrl =
-    "rtsp://ops:adm12345@nvrshlv.ddns.net:554/Streaming/Channels/501";
+    "rtsp://ops:ops12345@ccshlv.ddns.net:37770/cam/realmonitor?channel=1&subtype=0";
 
-  // Atur header respons untuk video
-  res.setHeader("Content-Type", "video/mp4");
+  // Set content type ke HLS
+  res.contentType("application/vnd.apple.mpegurl");
 
-  // Gunakan FFmpeg untuk mengonversi RTSP ke MP4
-  const ffmpeg = spawn("ffmpeg", [
-    "-i",
-    rtspUrl, // Input RTSP stream
-    "-f",
-    "mp4", // Format output (MP4)
-    "-movflags",
-    "frag_keyframe+empty_moov", // Streaming secara langsung
-    "-vf",
-    "scale=1280:720", // Menyesuaikan resolusi (opsional)
-    "-vcodec",
-    "libx264", // Video codec (H264)
-    "-preset",
-    "ultrafast", // Kecepatan konversi
-    "-tune",
-    "zerolatency", // Mengurangi latensi
-    "-f",
-    "mp4", // Output format
-    "pipe:1", // Output melalui pipe ke response HTTP
-  ]);
-
-  // Streaming data dari FFmpeg ke client
-  ffmpeg.stdout.pipe(res);
-
-  // Tangani error FFmpeg
-  ffmpeg.stderr.on("data", (data) => {
-    console.error(`FFmpeg error: ${data}`);
-  });
-
-  // Jika proses FFmpeg selesai, tutup respons
-  ffmpeg.on("close", (code) => {
-    if (code !== 0) {
-      res.status(500).send("Gagal memulai streaming");
+  try {
+    // Jika sudah ada streaming yang aktif, hentikan proses sebelumnya
+    if (ffmpegProcess) {
+      ffmpegProcess.kill("SIGINT"); // Menghentikan ffmpeg
     }
-  });
+
+    // Mulai streaming RTSP ke HLS
+    ffmpegProcess = ffmpeg(rtspUrl)
+      .addOptions([
+        "-preset fast",
+        "-f hls", // Format HLS
+        "-hls_time 2", // Durasi per segmen
+        "-hls_list_size 0", // Daftar segmen tidak terbatas
+        "-hls_flags delete_segments", // Menghapus segmen setelah selesai
+        "-start_number 1", // Mulai dengan segmen ke-1
+      ])
+      .output(res, { end: true }) // Output stream langsung ke response
+      .on("start", (commandLine) => {
+        console.log("FFmpeg command line:", commandLine); // Debugging perintah
+      })
+      .on("error", (err, stdout, stderr) => {
+        console.error("FFmpeg error:", err.message);
+        console.error("FFmpeg stderr:", stderr);
+        res.status(500).send(`Error streaming CCTV: ${err.message}`);
+      })
+      .on("end", () => {
+        console.log("Streaming selesai");
+      })
+      .run();
+  } catch (error) {
+    console.error("Streaming error:", error);
+    res.status(500).send("Error starting stream.");
+  }
 };

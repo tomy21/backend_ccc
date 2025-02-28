@@ -20,6 +20,7 @@ export const protectAuth = async (req, res, next) => {
     // Verifikasi token
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.Id;
+    req.roleId = decoded.role;
     // Cari user berdasarkan ID yang ada di token
     const currentUser = await Users.findByPk(decoded.Id);
     if (!currentUser) {

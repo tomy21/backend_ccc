@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { Role } from "./Role.js";
 import { LocationCCC } from "./Location.js";
+import ParkingLocation from "./LocationParking.js";
 
 export const Users = dbOCC.define(
   "OccUsers",
@@ -17,7 +18,7 @@ export const Users = dbOCC.define(
       type: DataTypes.STRING(150),
     },
     email: {
-      type: DataTypes.STRING(5),
+      type: DataTypes.STRING,
       allowNull: true,
     },
     email_confirmation: {
@@ -116,6 +117,10 @@ Users.belongsTo(Role, {
 });
 
 Users.belongsTo(LocationCCC, {
+  foreignKey: "id_lokasi",
+  targetKey: "id",
+});
+Users.belongsTo(ParkingLocation, {
   foreignKey: "id_lokasi",
   targetKey: "id",
 });

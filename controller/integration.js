@@ -1,20 +1,24 @@
 import axios from "axios";
 import crypto from "crypto";
 import base64 from "base-64";
+import https from "https";
 
 export const captureImage = async (req, res) => {
   const { cameraIP, username, password, channel = 1 } = req.body;
   try {
+    // Agent untuk mengabaikan SSL verification
+    const agent = new https.Agent({
+      rejectUnauthorized: false, // Abaikan sertifikat self-signed
+    });
+
     // Permintaan pertama untuk mendapatkan challenge digest
     const initialResponse = await axios.get(
-      `http://${cameraIP}/cgi-bin/snapshot.cgi?channel=${channel}`,
+      `https://${cameraIP}/cgi-bin/snapshot.cgi?channel=${channel}`,
       {
         validateStatus: (status) => status < 500,
+        httpsAgent: agent, // Gunakan agent di sini
       }
     );
-
-    console.log("Initial Response Status:", initialResponse.status);
-    console.log("Initial Response Headers:", initialResponse.headers);
 
     if (initialResponse.status === 401) {
       const authHeader = initialResponse.headers["www-authenticate"];
@@ -40,11 +44,13 @@ export const captureImage = async (req, res) => {
 
         const digestAuthHeader = `Digest username="${username}", realm="${realm}", nonce="${nonce}", uri="${uri}", qop=${qop}, nc=${nc}, cnonce="${cnonce}", response="${response}"`;
 
-        const finalResponse = await axios.get(`http://${cameraIP}${uri}`, {
+        // Permintaan kedua dengan autentikasi digest
+        const finalResponse = await axios.get(`https://${cameraIP}${uri}`, {
           headers: {
             Authorization: digestAuthHeader,
           },
           responseType: "arraybuffer",
+          httpsAgent: agent, // Gunakan agent di sini juga
         });
 
         res.set("Content-Type", "image/jpeg");
@@ -63,5 +69,3 @@ function extractAuthParam(header, param) {
   const match = new RegExp(`${param}="([^"]+)"`).exec(header);
   return match && match[1];
 }
-
-

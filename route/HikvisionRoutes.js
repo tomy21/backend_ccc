@@ -10,6 +10,6 @@ const router = express.Router();
 router.get("/hikvision/capture", captureImage);
 
 // Rute untuk memulai streaming video
-router.get("/hikvision/stream", streamVideo);
+router.get("/cctv/stream", streamVideo);
 
 export default router;
