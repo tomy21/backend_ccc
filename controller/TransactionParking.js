@@ -38,20 +38,31 @@ export const getAllTransactions = async (req, res) => {
 export const getAllTransactionsByLocation = async (req, res) => {
   try {
     const { locationCode } = req.params;
+    const { page = 1, limit = 10 } = req.query; // Ambil page & limit dari query params
 
     const location = await ParkingLocation.findOne({
       where: { LocationCode: locationCode },
     });
+
     if (!location) {
       return res.status(404).json({ message: "Location not found" });
-    } // Ambil Tarif berdasarkan Jenis Kendaraan
+    }
 
-    const transactions = await Transaction.findAll({
+    const offset = (parseInt(page) - 1) * parseInt(limit); // Hitung offset berdasarkan halaman
+
+    const { count, rows: transactions } = await Transaction.findAndCountAll({
       where: { LocationName: location.LocationName },
+      limit: parseInt(limit), // Jumlah data per halaman
+      offset: offset, // Mulai dari data ke berapa
+      order: [["updatedAt", "DESC"]], // Urutkan dari transaksi terbaru
     });
+
     res.json({
       status: true,
       message: "Transactions fetched successfully",
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(count / limit),
+      totalTransactions: count,
       transactions,
     });
   } catch (error) {
