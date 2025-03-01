@@ -138,6 +138,25 @@ export const getTransactionDetail = async (req, res) => {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
+    const inTime = new Date(transaction.InTime);
+    const outTime = new Date();
+    const durationMinutes = Math.abs(outTime - inTime) / (1000 * 60);
+
+    let finalTariff = transaction.Tariff;
+
+    if (durationMinutes <= 5) {
+      finalTariff = 0; // Gratis jika <= 5 menit
+    } else {
+      if (transaction.TypeVehicle === "Mobil") {
+        finalTariff = 5000;
+      } else {
+        finalTariff = 2000;
+      }
+    }
+    await transaction.update({
+      Tariff: finalTariff,
+    });
+
     res.json({
       status: true,
       message: "Transaction detail fetched successfully",
@@ -181,12 +200,18 @@ export const updateTransactionStatus = async (req, res) => {
     let finalTariff = transaction.Tariff;
     if (durationMinutes <= 5) {
       finalTariff = 0; // Gratis jika <= 5 menit
+    } else {
+      if (transaction.TypeVehicle === "Mobil") {
+        finalTariff = 5000;
+      } else {
+        finalTariff = 2000;
+      }
     }
 
     await transaction.update({
       OutTime: outTime,
       Tariff: finalTariff,
-      Status: "OUT",
+      Status: "Out",
       FotoBuktiPembayaran: req.file.path, // Simpan path gambar
     });
 
