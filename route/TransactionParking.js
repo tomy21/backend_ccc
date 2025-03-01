@@ -7,6 +7,7 @@ import {
   updateTransactionStatus,
   deleteTransaction,
   getAllTransactionsByLocation,
+  uploadFotoBukti,
 } from "../controller/TransactionParking.js";
 
 const router = express.Router();
@@ -19,7 +20,11 @@ router.get(
   "/transaction/byLocation/:locationCode",
   getAllTransactionsByLocation
 );
-router.put("/transaction/out/:TransactionCode", updateTransactionStatus);
+router.post(
+  "/transactions/:TransactionCode/update",
+  uploadFotoBukti,
+  updateTransactionStatus
+);
 router.delete("/transaction/:id", deleteTransaction);
 
 export default router;

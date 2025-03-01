@@ -1,6 +1,25 @@
 import moment from "moment";
 import Transaction from "../model/TransactionParking.js";
 import ParkingLocation from "../model/LocationParking.js";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = "uploads/";
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true }); // Buat folder jika belum ada
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname)); // Format: timestamp-random.ext
+  },
+});
+
+const upload = multer({ storage });
 
 const generateTransactionCode = (locationCode) => {
   const timestamp = moment().format("DDMMYYHHmmss");
@@ -124,12 +143,12 @@ export const getTransactionDetail = async (req, res) => {
 export const updateTransactionStatus = async (req, res) => {
   try {
     const { TransactionCode } = req.params;
-    const { FotoBuktiPembayaran } = req.body; // Hanya untuk OUT
 
-    if (!FotoBuktiPembayaran) {
+    // Pastikan ada file yang diupload
+    if (!req.file) {
       return res
         .status(400)
-        .json({ message: "FotoBuktiPembayaran is required" });
+        .json({ message: "Foto bukti pembayaran diperlukan" });
     }
 
     const transaction = await Transaction.findOne({
@@ -137,11 +156,11 @@ export const updateTransactionStatus = async (req, res) => {
     });
 
     if (!transaction) {
-      return res.status(404).json({ message: "Transaction not found" });
+      return res.status(404).json({ message: "Transaksi tidak ditemukan" });
     }
 
     if (transaction.Status === "OUT") {
-      return res.status(400).json({ message: "Transaction already completed" });
+      return res.status(400).json({ message: "Transaksi sudah selesai" });
     }
 
     const outTime = new Date();
@@ -157,18 +176,22 @@ export const updateTransactionStatus = async (req, res) => {
       OutTime: outTime,
       Tariff: finalTariff,
       Status: "OUT",
-      FotoBuktiPembayaran, // Simpan bukti pembayaran
+      FotoBuktiPembayaran: req.file.path, // Simpan path gambar
     });
 
     res.json({
       status: true,
-      message: "Transaction updated to OUT",
+      message: "Transaksi berhasil diperbarui",
       transaction,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error updating transaction", error });
+    res
+      .status(500)
+      .json({ message: "Terjadi kesalahan saat update transaksi", error });
   }
 };
+
+export const uploadFotoBukti = upload.single("FotoBuktiPembayaran");
 
 // Delete Transaction
 export const deleteTransaction = async (req, res) => {
