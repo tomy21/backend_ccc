@@ -47,7 +47,7 @@ const createSendToken = (user, statusCode, res, rememberMe) => {
 };
 
 export const login = async (req, res) => {
-  const { identidfier, password, rememberMe } = req.body;
+  const { identidfier, password, rememberMe = true } = req.body;
   const ip_address = req.ip;
   console.log(req.body);
   if (!identidfier || !password) {

@@ -68,6 +68,68 @@ export const getAllGates = async (req, res) => {
   }
 };
 
+export const getAllGatesByLocation = async (req, res) => {
+  try {
+    // Ambil query params untuk pagination, search, dan sorting
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "id",
+      order = "asc",
+    } = req.query;
+    const { idLocation } = req.params;
+
+    // Validasi order, hanya menerima 'asc' atau 'desc'
+    const sortOrder = order.toLowerCase() === "desc" ? "DESC" : "ASC";
+
+    // Query untuk pagination
+    const offset = (page - 1) * limit;
+
+    // Kondisi pencarian (search by gate name or location Name in LocationCCC)
+    const whereCondition = {
+      id_location: idLocation,
+      [Op.or]: [
+        { gate: { [Op.like]: `%${search}%` } }, // Search by gate name
+        { "$location.Name$": { [Op.like]: `%${search}%` } }, // Search by location.Name (kolom 'Name' dari LocationCCC)
+      ],
+    };
+
+    // Query database dengan pagination, search, dan sorting
+    const { rows: gates, count: total } = await Gate.findAndCountAll({
+      where: whereCondition,
+      include: [
+        {
+          model: LocationCCC,
+          as: "location",
+          attributes: ["Name"], // Pastikan ini field yang benar di LocationCCC
+        },
+      ],
+      order: [[sortBy, sortOrder]], // Sorting berdasarkan field dan order (asc/desc)
+      offset, // Mulai dari data ke berapa
+      limit: parseInt(limit), // Jumlah data yang ditampilkan per halaman
+    });
+
+    // Mengirim ke semua WebSocket client
+    notifyGateUpdate(req.io, gates);
+
+    // Kirim respons dengan data gates, total data, dan informasi pagination
+    res.status(200).json({
+      success: true,
+      message: "Gates retrieved successfully",
+      data: gates,
+      pagination: {
+        total,
+        page: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        limit: parseInt(limit),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get Gate By ID
 export const getGateByIdArduino = async (req, res) => {
   try {
@@ -290,7 +352,11 @@ export const updateGateArduino = async (req, res) => {
     // notifyGateUpdate(req.io, { event: "update", data: existingGate });
     // req.io.emit("gateViewed", { event: "view", data: "gate_Open" });
 
-    res.status(200).json(existingGate);
+    res.status(200).json({
+      status: "success",
+      message: "Gate updated successfully",
+      data: existingGate,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
