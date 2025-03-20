@@ -16,14 +16,15 @@ import logActivity from "./route/LogActivity.js";
 import StreamingCCTV from "./route/Streaming.js";
 import LocationParkingRoute from "./route/LocationParking.js";
 import TransactionParkingRoute from "./route/TransactionParking.js";
+import Location from "./route/Location.js";
+
 import { initRelations } from "./model/Relation.js";
 
 import { createServer } from "http";
-import { Server } from "socket.io";
+import { WebSocketServer } from "ws";
 
 const app = express();
-
-const httpServer = createServer(app);
+const server = createServer(app); // Gunakan HTTP server
 
 app.use(
   cors({
@@ -33,23 +34,26 @@ app.use(
 );
 app.options("*", cors());
 
-const io = new Server(httpServer, {
-  cors: {
-    origin: ["http://localhost:3000", "https://dev-occ.skyparking.online"],
-    methods: ["GET", "POST", "PUT"],
-    credentials: true,
-  },
+const wss = new WebSocketServer({ server });
+let isPopupActive = false;
+
+// Saat ada koneksi baru dari client
+wss.on("connection", (ws) => {
+  console.log("Client connected to WebSocket");
+
+  ws.on("message", (message) => {
+    console.log(`Client message: ${message}`);
+  });
+
+  ws.on("close", () => {
+    console.log("Client disconnected from WebSocket");
+  });
 });
 
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(cookieParser());
 app.use(bodyParser.json());
-
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
 
 initRelations();
 
@@ -63,31 +67,59 @@ app.use("/v01/occ/api", descriptionRoute);
 app.use("/v01/occ/api", transactionParking);
 app.use("/v01/occ/api", logActivity);
 app.use("/v01/occ/api", StreamingCCTV);
+app.use("/v01/occ/api", Location);
 
 app.use("/v01/parking/api", LocationParkingRoute);
 app.use("/v01/parking/api", TransactionParkingRoute);
 
-io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
+// ✅ Endpoint untuk trigger popup
+app.post("/trigger-popup", (req, res) => {
+  const { userLocation } = req.body;
+  
+  if (!userLocation) {
+    return res.status(400).json({ success: false, message: "User location is required" });
+  }
 
-  // Mengirim pesan ke client setelah terhubung
-  socket.emit("welcome", { message: "Welcome to Socket.IO server" });
+  if (isPopupActive) {
+    return res.status(400).json({ success: false, message: "Popup is already active!" });
+  }
 
-  // Menerima pesan dari client
-  socket.on("message", (msg) => {
-    console.log(`Message from client: ${msg}`);
+  isPopupActive = true; // Set popup aktif
 
-    // Kirim balasan ke client yang sama
-    socket.emit("response", { message: "Message received" });
+  const message = JSON.stringify({ showPopup: true, userLocation });
+
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) { // Pastikan WebSocket masih terbuka
+      client.send(message);
+    }
   });
 
-  // Event untuk menangani disconnect
-  socket.on("disconnect", () => {
-    console.log(`User disconnected: ${socket.id}`);
+  console.log(`📢 Popup triggered for location: ${userLocation}`);
+  res.json({ success: true, message: `Popup triggered for ${userLocation}` });
+});
+
+// ✅ Endpoint untuk menutup popup
+app.post("/close-popup", (req, res) => {
+  if (!isPopupActive) {
+    return res.status(400).json({ success: false, message: "No active popup to close!" });
+  }
+
+  isPopupActive = false; // Set popup tidak aktif
+
+  const message = JSON.stringify({ showPopup: false });
+
+  console.log("❌ Sending WebSocket message:", message);
+
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) {
+      client.send(message);
+    }
   });
+
+  res.json({ success: true, message: "Popup closed" });
 });
 
 const PORT = 7001;
-httpServer.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server berjalan di http://localhost:${PORT}`);
 });

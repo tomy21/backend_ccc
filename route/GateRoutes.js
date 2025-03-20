@@ -24,7 +24,7 @@ router.post("/gates", (req, res) => {
   notifyGateUpdate(req.io, { event: "create", data: req.body });
 });
 router.put("/gates/:id", protectAuth, updateGate);
-router.put("/gates/arduino/:id", protectAuth, updateGateArduino);
+router.put("/gates/arduino/:id", updateGateArduino);
 router.delete("/gates/:id", (req, res) => {
   deleteGate(req, res);
   notifyGateUpdate(req.io, { event: "delete", data: req.params.id });

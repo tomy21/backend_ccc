@@ -69,6 +69,10 @@ export const LocationCCC = dbOCC.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    recordStatus: {
+      type: DataTypes.ENUM(0, 1, 2),
+      allowNull: false,
+    },
   },
   {
     timestamps: false,

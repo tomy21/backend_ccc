@@ -48,8 +48,8 @@ export const getAllGates = async (req, res) => {
       limit: parseInt(limit), // Jumlah data yang ditampilkan per halaman
     });
 
-    // Mengirim ke semua WebSocket client
-    notifyGateUpdate(req.io, gates);
+    // // Mengirim ke semua WebSocket client
+    // notifyGateUpdate(req.io, gates);
 
     // Kirim respons dengan data gates, total data, dan informasi pagination
     res.status(200).json({
@@ -79,7 +79,6 @@ export const getAllGatesByLocation = async (req, res) => {
       order = "asc",
     } = req.query;
     const { idLocation } = req.params;
-
     // Validasi order, hanya menerima 'asc' atau 'desc'
     const sortOrder = order.toLowerCase() === "desc" ? "DESC" : "ASC";
 
@@ -88,7 +87,7 @@ export const getAllGatesByLocation = async (req, res) => {
 
     // Kondisi pencarian (search by gate name or location Name in LocationCCC)
     const whereCondition = {
-      id_location: idLocation,
+      id_location: parseInt(idLocation, 10),
       [Op.or]: [
         { gate: { [Op.like]: `%${search}%` } }, // Search by gate name
         { "$location.Name$": { [Op.like]: `%${search}%` } }, // Search by location.Name (kolom 'Name' dari LocationCCC)
@@ -111,7 +110,7 @@ export const getAllGatesByLocation = async (req, res) => {
     });
 
     // Mengirim ke semua WebSocket client
-    notifyGateUpdate(req.io, gates);
+    // notifyGateUpdate(req.io, gates);
 
     // Kirim respons dengan data gates, total data, dan informasi pagination
     res.status(200).json({
@@ -221,10 +220,10 @@ const processQueue = async () => {
     // Emit hanya jika belum pernah mengirim emit
     // if (!isEmitting) {
     //   isEmitting = true; // Tandai bahwa emit sudah dilakukan
-    req.io.emit("gateViewed", {
-      event: "view",
-      data: { dataGate: gate, dataIssues: issueResponse },
-    });
+    // req.io.emit("gateViewed", {
+    //   event: "view",
+    //   data: { dataGate: gate, dataIssues: issueResponse },
+    // });
     // }
 
     res.status(200).json({
