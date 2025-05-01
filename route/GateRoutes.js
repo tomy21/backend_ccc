@@ -19,10 +19,7 @@ router.get("/gates/getGateAllBylocation/:idLocation", getAllGates);
 router.get("/gates/getGateBylocation/:idLocation", getAllGatesByLocation);
 router.get("/gates/:id", getGateById);
 router.get("/gatesArduino/:id", getArduinoById);
-router.post("/gates", (req, res) => {
-  createGate(req, res);
-  notifyGateUpdate(req.io, { event: "create", data: req.body });
-});
+router.post("/gates/create-data", protectAuth, createGate);
 router.put("/gates/:id", protectAuth, updateGate);
 router.put("/gates/arduino/:id", updateGateArduino);
 router.delete("/gates/:id", (req, res) => {

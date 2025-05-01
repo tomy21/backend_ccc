@@ -14,7 +14,7 @@ const router = express.Router();
 router.post("/category/create", protectAuth, createCategory);
 router.get("/category", getAllCategories);
 router.get("/getById/:id", getCategoryById);
-router.put("/getById/update/:id", updateCategory);
-router.delete("/getById/update/:id", deleteCategory);
+router.put("/getById/update/:id", protectAuth, updateCategory);
+router.delete("/getById/delete/:id", protectAuth, deleteCategory);
 
 export default router;

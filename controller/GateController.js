@@ -268,21 +268,25 @@ export const getArduinoById = async (req, res) => {
 
 // Create a New Gate
 export const createGate = async (req, res) => {
-  const { id_location, gate, channel_cctv, arduino, id_tele } = req.body;
-
+  const { formData } = req.body;
+  console.log(req.body);
   try {
     const newGate = await Gate.create({
-      id_location,
-      gate,
-      channel_cctv,
-      arduino,
-      id_tele,
+      id_location: formData.id_location,
+      gate: formData.gate,
+      channel_cctv: formData.channel_cctv,
+      arduino: formData.arduino,
+      id_tele: formData.id_tele,
     });
 
     // Kirim ke semua WebSocket client setelah pembuatan gate
-    notifyGateUpdate(req.io, { event: "create", data: newGate });
+    // notifyGateUpdate(req.io, { event: "create", data: newGate });
 
-    res.status(201).json(newGate);
+    res.status(201).json({
+      statusCode: 210201,
+      message: "Gate created",
+      data: newGate,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -62,7 +62,7 @@ export const getCategoryById = async (req, res) => {
   try {
     const category = await CategoryModel.findByPk(id);
     if (category) {
-      res.status(200).json(category);
+      res.status(200).json({ code: 200, status: "success", category });
     } else {
       res.status(404).json({ message: "Category not found" });
     }

@@ -2,8 +2,8 @@ import { DataTypes } from "sequelize";
 import { dbOCC } from "../config/dbConfig.js";
 import { LocationCCC } from "./Location.js";
 
-export const Gate = dbOCC.define(
-  "OccGate",
+export const CCTV = dbOCC.define(
+  "OccCctv",
   {
     id: {
       type: DataTypes.BIGINT,
@@ -11,42 +11,42 @@ export const Gate = dbOCC.define(
       autoIncrement: true,
       allowNull: false,
     },
-    id_location: {
+    id_lokasi: {
       type: DataTypes.BIGINT,
       allowNull: false,
     },
-    gate: {
+    ip_cctv: {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    channel_cctv: {
+    rtsp_url: {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    arduino: {
+    capture_url: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    channel: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    is_active: {
       type: DataTypes.ENUM("0", "1"),
       allowNull: true,
     },
-    statusGate: {
-      type: DataTypes.ENUM("0", "1"),
-      allowNull: true,
-    },
-    id_tele: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    createdAt: {
+    created_at: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: DataTypes.NOW,
     },
-    updatedAt: {
+    updated_at: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: DataTypes.NOW,
       onUpdate: DataTypes.NOW,
     },
-    deletedAt: {
+    deleted_at: {
       type: DataTypes.DATE,
       allowNull: true,
     },
@@ -54,14 +54,14 @@ export const Gate = dbOCC.define(
   {
     timestamps: false,
     paranoid: true, // Enable soft delete
-    tableName: "OccGate", // Nama tabel di database
+    tableName: "OccCctv", // Nama tabel di database
   }
 );
 
-Gate.belongsTo(LocationCCC, {
-  foreignKey: "id_location", // Foreign key di Gate
+CCTV.belongsTo(LocationCCC, {
+  foreignKey: "id_lokasi", // Foreign key di Gate
   targetKey: "id", // Primary key di LocationCCC
   as: "location", // Alias untuk relasi ini
 });
 
-export default Gate;
+export default CCTV;

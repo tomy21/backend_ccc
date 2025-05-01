@@ -17,6 +17,8 @@ import StreamingCCTV from "./route/Streaming.js";
 import LocationParkingRoute from "./route/LocationParking.js";
 import TransactionParkingRoute from "./route/TransactionParking.js";
 import Location from "./route/Location.js";
+import cctv from "./route/CctvRoute.js";
+import selfValet from "./route/SelfValet.js";
 
 import { initRelations } from "./model/Relation.js";
 
@@ -68,28 +70,36 @@ app.use("/v01/occ/api", transactionParking);
 app.use("/v01/occ/api", logActivity);
 app.use("/v01/occ/api", StreamingCCTV);
 app.use("/v01/occ/api", Location);
+app.use("/v01/occ/api", cctv);
 
 app.use("/v01/parking/api", LocationParkingRoute);
 app.use("/v01/parking/api", TransactionParkingRoute);
 
+app.use("/v01/valet/api", selfValet);
+
 // ✅ Endpoint untuk trigger popup
 app.post("/trigger-popup", (req, res) => {
   const { userLocation } = req.body;
-  
+
   if (!userLocation) {
-    return res.status(400).json({ success: false, message: "User location is required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "User location is required" });
   }
 
   if (isPopupActive) {
-    return res.status(400).json({ success: false, message: "Popup is already active!" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Popup is already active!" });
   }
 
   isPopupActive = true; // Set popup aktif
 
   const message = JSON.stringify({ showPopup: true, userLocation });
 
-  wss.clients.forEach(client => {
-    if (client.readyState === 1) { // Pastikan WebSocket masih terbuka
+  wss.clients.forEach((client) => {
+    if (client.readyState === 1) {
+      // Pastikan WebSocket masih terbuka
       client.send(message);
     }
   });
@@ -101,7 +111,9 @@ app.post("/trigger-popup", (req, res) => {
 // ✅ Endpoint untuk menutup popup
 app.post("/close-popup", (req, res) => {
   if (!isPopupActive) {
-    return res.status(400).json({ success: false, message: "No active popup to close!" });
+    return res
+      .status(400)
+      .json({ success: false, message: "No active popup to close!" });
   }
 
   isPopupActive = false; // Set popup tidak aktif
@@ -110,7 +122,7 @@ app.post("/close-popup", (req, res) => {
 
   console.log("❌ Sending WebSocket message:", message);
 
-  wss.clients.forEach(client => {
+  wss.clients.forEach((client) => {
     if (client.readyState === 1) {
       client.send(message);
     }
