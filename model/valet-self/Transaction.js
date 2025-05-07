@@ -40,6 +40,7 @@ export const Transaction = dbOCC.define(
     tariffVip: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      defaultValue: 0,
     },
     pathImage: {
       type: DataTypes.STRING,
