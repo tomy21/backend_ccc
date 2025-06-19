@@ -226,7 +226,7 @@ export const updateTransactionStatus = async (req, res) => {
 
     let finalTariff = transaction.Tariff;
     if (durationMinutes <= 5) {
-      finalTariff = 0; // Gratis jika <= 5 menit
+      finalTariff = 5000; // Gratis jika <= 5 menit
     } else {
       if (transaction.TypeVehicle === "Mobil") {
         finalTariff = 5000;
