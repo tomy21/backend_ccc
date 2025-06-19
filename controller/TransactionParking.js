@@ -152,7 +152,13 @@ export const getTransactionDetail = async (req, res) => {
     const { TransactionCode } = req.params;
 
     const transaction = await Transaction.findOne({
-      where: { TransactionCode },
+      where: {
+        Status: "In",
+        [Op.or]: [
+          { TransactionCode: TransactionCode },
+          { RefNumber: TransactionCode },
+        ],
+      },
     });
 
     if (!transaction) {
@@ -166,7 +172,7 @@ export const getTransactionDetail = async (req, res) => {
     let finalTariff = transaction.Tariff;
 
     if (durationMinutes <= 5) {
-      finalTariff = 0; // Gratis jika <= 5 menit
+      finalTariff = 5000; // Gratis jika <= 5 menit
     } else {
       if (transaction.TypeVehicle === "Mobil") {
         finalTariff = 5000;
