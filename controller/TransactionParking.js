@@ -4,6 +4,7 @@ import ParkingLocation from "../model/LocationParking.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { Op } from "sequelize";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -85,7 +86,7 @@ export const getTransactionById = async (req, res) => {
 // Create New Transaction
 export const createTransaction = async (req, res) => {
   try {
-    const { LocationCode, TypeVehicle } = req.body;
+    const { LocationCode, TypeVehicle, refNumber = null } = req.body;
     console.log(req.body);
     if (!LocationCode || !TypeVehicle) {
       return res
@@ -107,7 +108,7 @@ export const createTransaction = async (req, res) => {
     // Create Transaction (tanpa FotoBuktiPembayaran)
     const transaction = await Transaction.create({
       TransactionCode: transactionCode,
-      RefNumber: transactionCode,
+      RefNumber: refNumber === null ? transactionCode : refNumber,
       LocationName: location.LocationName,
       Vendor: location.Vendor,
       // Tariff,
@@ -175,14 +176,19 @@ export const updateTransactionStatus = async (req, res) => {
     const { TransactionCode } = req.params;
 
     // Pastikan ada file yang diupload
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ message: "Foto bukti pembayaran diperlukan" });
-    }
+    // if (!req.file) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Foto bukti pembayaran diperlukan" });
+    // }
 
     const transaction = await Transaction.findOne({
-      where: { TransactionCode },
+      where: {
+        [Op.or]: [
+          { TransactionCode: TransactionCode },
+          { RefNumber: TransactionCode },
+        ],
+      },
     });
 
     if (!transaction) {
@@ -212,7 +218,7 @@ export const updateTransactionStatus = async (req, res) => {
       OutTime: outTime,
       Tariff: finalTariff,
       Status: "Out",
-      FotoBuktiPembayaran: req.file.path, // Simpan path gambar
+      // FotoBuktiPembayaran: req.file.path, // Simpan path gambar
     });
 
     res.json({

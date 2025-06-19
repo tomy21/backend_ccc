@@ -20,11 +20,7 @@ router.get(
   "/transaction/byLocation/:locationCode",
   getAllTransactionsByLocation
 );
-router.post(
-  "/transactions/:TransactionCode/update",
-  uploadFotoBukti,
-  updateTransactionStatus
-);
+router.post("/transactions/:TransactionCode/update", updateTransactionStatus);
 router.delete("/transaction/:id", deleteTransaction);
 
 export default router;

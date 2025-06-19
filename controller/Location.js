@@ -32,7 +32,7 @@ export const getAllLocations = async (req, res) => {
       where: whereCondition,
       limit,
       offset,
-      order: [["created_at", "DESC"]], // Urut berdasarkan tanggal terbaru
+      order: [["CreatedAt", "DESC"]], // Urut berdasarkan tanggal terbaru
     });
 
     return res.status(200).json({
@@ -81,7 +81,7 @@ export const getLocationsAll = async (req, res) => {
       where: whereCondition,
       limit,
       offset,
-      order: [["created_at", "DESC"]], // Urut berdasarkan tanggal terbaru
+      order: [["CreatedAt", "DESC"]], // Urut berdasarkan tanggal terbaru
     });
 
     return res.status(200).json({

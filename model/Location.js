@@ -54,18 +54,18 @@ export const LocationCCC = dbOCC.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    created_at: {
+    CreatedAt: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: DataTypes.NOW,
     },
-    updated_at: {
+    UpdatedAt: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: DataTypes.NOW,
       onUpdate: DataTypes.NOW,
     },
-    deleted_at: {
+    DeletedAt: {
       type: DataTypes.DATE,
       allowNull: true,
     },
