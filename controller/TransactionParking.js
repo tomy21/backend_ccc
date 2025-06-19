@@ -105,6 +105,14 @@ export const createTransaction = async (req, res) => {
     // Generate Transaction Code
     const transactionCode = generateTransactionCode(LocationCode);
 
+    const cekRefrenceNumber = await Transaction.findOne({
+      where: { RefNumber: refNumber, Status: "In" },
+    });
+
+    if (cekRefrenceNumber) {
+      return res.status(400).json({ message: "Kendaraan Kamu masih di area" });
+    }
+
     // Create Transaction (tanpa FotoBuktiPembayaran)
     const transaction = await Transaction.create({
       TransactionCode: transactionCode,
