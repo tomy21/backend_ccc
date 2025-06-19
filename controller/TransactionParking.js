@@ -184,7 +184,7 @@ export const updateTransactionStatus = async (req, res) => {
 
     const transaction = await Transaction.findOne({
       where: {
-        status: "In",
+        Status: "In",
         [Op.or]: [
           { TransactionCode: TransactionCode },
           { RefNumber: TransactionCode },
