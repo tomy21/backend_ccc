@@ -87,39 +87,48 @@ export const getTransactionById = async (req, res) => {
 export const createTransaction = async (req, res) => {
   try {
     const { LocationCode, TypeVehicle, refNumber = null } = req.body;
-    console.log(req.body);
+
     if (!LocationCode || !TypeVehicle) {
-      return res
-        .status(400)
-        .json({ message: "LocationCode and TypeVehicle are required" });
+      return res.status(400).json({
+        message: "LocationCode and TypeVehicle are required",
+      });
     }
 
-    // Lookup ParkingLocation
-    const location = await ParkingLocation.findOne({ where: { LocationCode } });
+    // Cek lokasi
+    const location = await ParkingLocation.findOne({
+      where: { LocationCode },
+    });
     if (!location) {
       return res.status(404).json({ message: "Location not found" });
-    } // Ambil Tarif berdasarkan Jenis Kendaraan
-    let Tariff =
-      TypeVehicle === "Mobil" ? location.TariffMobil : location.TariffMotor;
-
-    // Generate Transaction Code
-    const transactionCode = generateTransactionCode(LocationCode);
-
-    const cekRefrenceNumber = await Transaction.findOne({
-      where: { RefNumber: refNumber, Status: "In" },
-    });
-
-    if (cekRefrenceNumber) {
-      return res.status(400).json({ message: "Kendaraan Kamu masih di area" });
     }
 
-    // Create Transaction (tanpa FotoBuktiPembayaran)
+    // Tarif sesuai jenis kendaraan
+    const Tariff =
+      TypeVehicle === "Mobil" ? location.TariffMobil : location.TariffMotor;
+
+    // ⛔ Cek jika RefNumber sudah ada dan statusnya masih "In"
+    if (refNumber) {
+      const cekRef = await Transaction.findOne({
+        where: { RefNumber: refNumber, Status: "In" },
+      });
+
+      if (cekRef) {
+        return res.status(400).json({
+          status: false,
+          message: "Transaksi dengan kendaraan ini masih aktif di area parkir",
+        });
+      }
+    }
+
+    // Generate kode transaksi
+    const transactionCode = generateTransactionCode(LocationCode);
+
+    // Buat transaksi baru
     const transaction = await Transaction.create({
       TransactionCode: transactionCode,
-      RefNumber: refNumber === null ? transactionCode : refNumber,
+      RefNumber: refNumber || transactionCode,
       LocationName: location.LocationName,
       Vendor: location.Vendor,
-      // Tariff,
       TypeVehicle,
       Status: "In",
       InTime: new Date(),
@@ -127,11 +136,14 @@ export const createTransaction = async (req, res) => {
 
     res.status(201).json({
       status: true,
-      message: "Transaction created successfully",
+      message: "Transaksi berhasil dibuat",
       transaction,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error creating transaction", error });
+    res.status(500).json({
+      message: "Terjadi kesalahan saat membuat transaksi",
+      error: error.message,
+    });
   }
 };
 
