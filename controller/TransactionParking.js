@@ -200,6 +200,7 @@ export const getTransactionDetail = async (req, res) => {
 export const updateTransactionStatus = async (req, res) => {
   try {
     const { TransactionCode } = req.params;
+    const { Tariff } = req.body;
 
     // Pastikan ada file yang diupload
     // if (!req.file) {
@@ -230,20 +231,20 @@ export const updateTransactionStatus = async (req, res) => {
     const inTime = new Date(transaction.InTime);
     const durationMinutes = Math.abs(outTime - inTime) / (1000 * 60);
 
-    let finalTariff = transaction.Tariff;
-    if (durationMinutes <= 5) {
-      finalTariff = 5000; // Gratis jika <= 5 menit
-    } else {
-      if (transaction.TypeVehicle === "Mobil") {
-        finalTariff = 5000;
-      } else {
-        finalTariff = 2000;
-      }
-    }
+    // let finalTariff = transaction.Tariff;
+    // if (durationMinutes <= 5) {
+    //   finalTariff = 5000; // Gratis jika <= 5 menit
+    // } else {
+    //   if (transaction.TypeVehicle === "Mobil") {
+    //     finalTariff = 5000;
+    //   } else {
+    //     finalTariff = 2000;
+    //   }
+    // }
 
     await transaction.update({
       OutTime: outTime,
-      Tariff: finalTariff,
+      Tariff: Tariff,
       Status: "Out",
       // FotoBuktiPembayaran: req.file.path, // Simpan path gambar
     });
