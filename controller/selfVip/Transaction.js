@@ -21,6 +21,18 @@ export const createTransaction = async (req, res) => {
       imagePath = `/uploads/${image.filename}`; // untuk digunakan di frontend atau simpan path relatif
     }
 
+    const cekTransaction = await Transaction.findOne({
+      where: {
+        transactionNo: transactionNo,
+      },
+    });
+
+    if (cekTransaction) {
+      return res
+        .status(400)
+        .json({ message: "Transaction number already exists" });
+    }
+
     const data = await Transaction.create({
       transactionNo,
       locationCode,
