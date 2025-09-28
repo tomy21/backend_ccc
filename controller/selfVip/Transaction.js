@@ -10,7 +10,7 @@ export const createTransaction = async (req, res) => {
       vehicleType,
       inTime,
       tariffParking,
-      tarifVip,
+      tariffVip,
       status,
     } = req.body;
 
@@ -41,7 +41,7 @@ export const createTransaction = async (req, res) => {
       vehicleType,
       inTime,
       tariffParking,
-      tarifVip,
+      tariffVip,
       pathImage: imagePath,
       status,
     });
